@@ -2,193 +2,107 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <meta name="theme-color" content="#ff4757">
-    <title>BetRed | بِت رِد</title>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetRed | گردونه شانس</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Vazirmatn', sans-serif;
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
-            color: #fff;
+            color: white;
             padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
         }
         .header {
-            background: linear-gradient(135deg, rgba(255,71,87,0.2), rgba(102,126,234,0.2));
-            backdrop-filter: blur(20px);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 30px;
             padding: 20px;
             margin-bottom: 25px;
-            text-align: center;
         }
-        .header h1 {
-            font-size: 1.8em;
-            background: linear-gradient(90deg, #ff4757, #667eea);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .score-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 25px;
-            padding: 20px;
+        .score {
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 15px;
             margin-bottom: 25px;
-            text-align: center;
         }
         .score-value {
             font-size: 2.5em;
-            font-weight: 800;
+            font-weight: bold;
+            color: #ffd700;
         }
-        .wheel-container { text-align: center; margin-bottom: 25px; }
-        canvas { max-width: 100%; background: #1a1a2e; border-radius: 50%; }
-        .spin-btn {
+        canvas {
+            max-width: 100%;
+            background: #1a1a2e;
+            border-radius: 50%;
+            margin: 20px auto;
+        }
+        button {
             background: linear-gradient(90deg, #ff4757, #ff6b81);
-            margin-top: 20px;
-            font-size: 1.2em;
+            width: 100%;
             padding: 15px;
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 10px 0;
+            cursor: pointer;
         }
-        .result-box {
+        .result {
             background: rgba(0,0,0,0.5);
             border-radius: 20px;
             padding: 15px;
-            margin-top: 20px;
-            text-align: center;
+            margin: 15px 0;
         }
-        .menu-grid {
+        .menu {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
+            gap: 10px;
+            margin-top: 20px;
         }
-        .menu-item {
+        .menu button {
             background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            font-size: 1em;
+            padding: 10px;
         }
-        .menu-item:active { transform: scale(0.95); }
-        .menu-item i { font-size: 1.8em; color: #667eea; }
-        .menu-item span { font-size: 0.8em; display: block; margin-top: 5px; }
-        .btn {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 15px;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .help-card {
-            background: rgba(0,0,0,0.3);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 10px;
-        }
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.9);
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            z-index: 1000;
-            display: none;
-        }
-        .toast.show { display: block; animation: slideUp 0.3s; }
-        .toast.success { border-right: 4px solid #2ed573; }
-        .toast.error { border-right: 4px solid #ff4757; }
-        .panel { display: none; }
-        .panel.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(100px); } to { transform: translateY(0); } }
-        code { background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 10px; display: inline-block; }
     </style>
 </head>
 <body>
-
-<div class="header">
-    <h1><i class="fas fa-crown"></i> بِت رِد | BetRed</h1>
-    <p>گردونه شانس روزانه</p>
-</div>
-
-<div class="score-card">
-    <div class="score-label"><i class="fas fa-gem"></i> الماس شما</div>
-    <div class="score-value" id="diamondScore">در حال دریافت...</div>
-</div>
-
-<div class="wheel-container">
+<div class="container">
+    <div class="header">
+        <h1>🎰 بِت رِد | BetRed</h1>
+        <p>گردونه شانس روزانه</p>
+    </div>
+    
+    <div class="score">
+        <div>💰 الماس شما</div>
+        <div class="score-value" id="balance">در حال دریافت...</div>
+    </div>
+    
     <canvas id="wheelCanvas" width="300" height="300"></canvas>
-    <button class="btn spin-btn" id="spinBtn" onclick="spinWheel()">
-        <i class="fas fa-play"></i> چرخوندن گردونه
-    </button>
-    <div class="result-box" id="resultBox">⏳ برای چرخوندن دکمه رو بزن</div>
-</div>
-
-<div class="menu-grid">
-    <div class="menu-item" onclick="showPanel('transferPanel')">
-        <i class="fas fa-exchange-alt"></i><span>انتقال الماس</span>
-    </div>
-    <div class="menu-item" onclick="showPanel('referralPanel')">
-        <i class="fas fa-users"></i><span>دعوت دوستان</span>
-    </div>
-    <div class="menu-item" onclick="showPanel('chargePanel')">
-        <i class="fas fa-shopping-cart"></i><span>شارژ موجودی</span>
-    </div>
-    <div class="menu-item" onclick="openBot()">
-        <i class="fab fa-telegram"></i><span>باز کردن ربات</span>
+    <button id="spinBtn">🎡 چرخوندن گردونه</button>
+    <div class="result" id="result">⏳ برای چرخوندن دکمه رو بزن</div>
+    
+    <div class="menu">
+        <button onclick="askBalance()">💰 موجودی</button>
+        <button onclick="openBot()">📲 ربات</button>
     </div>
 </div>
-
-<div class="panel" id="transferPanel">
-    <div class="help-card">
-        <h4>💎 نحوه انتقال الماس</h4>
-        <p>در گروه ربات دستور زیر رو بفرست:</p>
-        <code>انتقال 20 @username</code>
-        <button class="btn" onclick="openBot()" style="margin-top:15px;">📲 باز کردن ربات</button>
-    </div>
-</div>
-
-<div class="panel" id="referralPanel">
-    <div class="help-card">
-        <h4>🎁 پاداش دعوت</h4>
-        <p>به ازای هر دوست که دعوت کنی <strong>40 الماس</strong> هدیه میگیری!</p>
-        <p>🔗 لینک دعوت تو:</p>
-        <code id="referralLink" style="word-break:break-all;"></code>
-        <button class="btn" onclick="copyReferralLink()">📋 کپی لینک</button>
-    </div>
-</div>
-
-<div class="panel" id="chargePanel">
-    <div class="help-card">
-        <h4>💳 اطلاعات پرداخت</h4>
-        <p>💳 کارت: <code>6219861958919879</code><br>👤 به نام: یوسف فر<br>💎 هر الماس: ۱۵ تومان</p>
-        <button class="btn" onclick="openBot()">📲 باز کردن ربات</button>
-    </div>
-</div>
-
-<div class="toast" id="toast"><span id="toastMessage"></span></div>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
     
-    let userId = tg.initDataUnsafe.user?.id;
-    let botUsername = "SelfsazRedBot";
-    let API_URL = "https://Kos6rrrr.pythonanywhere.com";
-    
-    let lastSpinDate = localStorage.getItem(`lastSpin_${userId}`);
-    let canSpin = true;
-    
+    // بخش‌های گردونه
     const segments = [
         { label: "10", value: 10, color: "#ff4757" },
         { label: "20", value: 20, color: "#2ed573" },
@@ -202,36 +116,17 @@
     
     let currentAngle = 0;
     let spinning = false;
+    let lastSpin = localStorage.getItem('lastSpin');
+    let canSpin = true;
     
-    async function loadBalance() {
-        try {
-            let response = await fetch(`${API_URL}/api/get_balance?user_id=${userId}`);
-            let data = await response.json();
-            if (data.ok) {
-                document.getElementById('diamondScore').innerHTML = `${data.balance.toLocaleString()} 💎`;
-            } else {
-                document.getElementById('diamondScore').innerHTML = '---';
-            }
-        } catch(e) {
-            document.getElementById('diamondScore').innerHTML = 'خطا';
-        }
-    }
-    
-    async function addBalance(amount) {
-        try {
-            let response = await fetch(`${API_URL}/api/add_balance`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId, amount: amount })
-            });
-            let data = await response.json();
-            if (data.ok) {
-                loadBalance();
-                return true;
-            }
-            return false;
-        } catch(e) {
-            return false;
+    // چک کردن ۲۴ ساعت
+    if (lastSpin) {
+        let diff = (Date.now() - parseInt(lastSpin)) / (1000 * 60 * 60);
+        if (diff < 24) {
+            canSpin = false;
+            let remaining = Math.ceil(24 - diff);
+            document.getElementById('result').innerHTML = `⏳ چرخش بعدی: ${remaining} ساعت دیگه`;
+            document.getElementById('spinBtn').disabled = true;
         }
     }
     
@@ -257,7 +152,7 @@
             ctx.translate(center, center);
             ctx.rotate(start + angleStep / 2);
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 16px Vazirmatn";
+            ctx.font = "bold 16px 'Segoe UI'";
             ctx.fillText(segments[i].label, radius - 25, 8);
             ctx.restore();
         }
@@ -270,52 +165,13 @@
         ctx.fill();
     }
     
-    function showToast(message, isError = false) {
-        let toast = document.getElementById('toast');
-        let toastMsg = document.getElementById('toastMessage');
-        toastMsg.innerHTML = message;
-        toast.className = isError ? 'toast show error' : 'toast show success';
-        setTimeout(() => toast.classList.remove('show'), 3000);
+    // ارسال درخواست به ربات
+    function sendToBot(action, amount = 0) {
+        tg.sendData(JSON.stringify({ action: action, amount: amount }));
     }
     
-    function showPanel(panelId) {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.getElementById(panelId).classList.add('active');
-        if (panelId === 'referralPanel') {
-            document.getElementById('referralLink').innerHTML = `https://t.me/${botUsername}?start=${userId}`;
-        }
-    }
-    
-    function openBot() {
-        tg.openTelegramLink(`https://t.me/${botUsername}`);
-        tg.close();
-    }
-    
-    async function sendPrizeToBot(amount) {
-        const resultBox = document.getElementById('resultBox');
-        resultBox.innerHTML = `🎉 تبریک! ${amount} الماس برنده شدی! 🎉`;
-        
-        let success = await addBalance(amount);
-        if (success) {
-            showToast(`✅ ${amount} الماس به حساب شما اضافه شد!`);
-            localStorage.setItem(`lastSpin_${userId}`, new Date().toISOString());
-            canSpin = false;
-            document.getElementById('resultBox').innerHTML = `⏳ چرخش بعدی: 24 ساعت دیگه`;
-        } else {
-            showToast("❌ خطا در ثبت جایزه", true);
-        }
-    }
-    
-    function spinWheel() {
-        if (spinning) {
-            showToast("⏳ در حال چرخیدن...", true);
-            return;
-        }
-        
-        if (!canSpin) {
-            showToast("❌ هر 24 ساعت فقط یک بار می‌تونی بچرخی!", true);
-            return;
-        }
+    async function spinWheel() {
+        if (spinning || !canSpin) return;
         
         spinning = true;
         const spinBtn = document.getElementById('spinBtn');
@@ -342,39 +198,38 @@
             } else {
                 currentAngle = endAngle % (Math.PI * 2);
                 drawWheel();
-                sendPrizeToBot(targetValue);
+                
+                document.getElementById('result').innerHTML = `🎉 تبریک! ${targetValue} الماس برنده شدی! 🎉`;
+                sendToBot('spin', targetValue);
+                
+                localStorage.setItem('lastSpin', Date.now().toString());
+                canSpin = false;
+                
                 spinning = false;
-                spinBtn.disabled = false;
             }
         }
         
         requestAnimationFrame(animate);
     }
     
-    function copyReferralLink() {
-        let link = `https://t.me/${botUsername}?start=${userId}`;
-        navigator.clipboard.writeText(link);
-        showToast("✅ لینک دعوت کپی شد!");
+    function askBalance() {
+        sendToBot('balance');
+        tg.close();
     }
     
-    if (lastSpinDate) {
-        let last = new Date(lastSpinDate);
-        let now = new Date();
-        let diffHours = (now - last) / (1000 * 60 * 60);
-        if (diffHours < 24) {
-            canSpin = false;
-            let remaining = Math.ceil(24 - diffHours);
-            document.getElementById('resultBox').innerHTML = `⏳ چرخش بعدی: ${remaining} ساعت دیگه`;
-        }
+    function openBot() {
+        tg.openTelegramLink('https://t.me/SelfsazRedBot');
+        tg.close();
     }
     
-    if (userId) {
-        loadBalance();
-        drawWheel();
-        document.getElementById('referralLink').innerHTML = `https://t.me/${botUsername}?start=${userId}`;
-    } else {
-        document.getElementById('diamondScore').innerHTML = 'ورود ناموفق';
-    }
+    document.getElementById('spinBtn').onclick = spinWheel;
+    
+    drawWheel();
+    
+    // فقط یه پیام خوش‌آمدگویی
+    setTimeout(() => {
+        document.getElementById('balance').innerHTML = '👆 روی دکمه موجودی کلیک کن';
+    }, 1000);
 </script>
 </body>
 </html>
