@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#ff4757">
+    <title>BetRed | گردونه شانس</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, rgba(255,71,87,0.2), rgba(102,126,234,0.2));
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .header h1 {
+            font-size: 1.8em;
+            background: linear-gradient(90deg, #ff4757, #667eea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .score-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 25px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .score-card:active { transform: scale(0.98); }
+        .score-value {
+            font-size: 2.5em;
+            font-weight: 800;
+        }
+        .wheel-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        canvas {
+            max-width: 100%;
+            background: #1a1a2e;
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .spin-btn {
+            background: linear-gradient(90deg, #ff4757, #ff6b81);
+            margin-top: 20px;
+            font-size: 1.2em;
+            padding: 15px;
+        }
+        .result-box {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .menu-item {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .menu-item:active { transform: scale(0.95); }
+        .menu-item i { font-size: 1.8em; color: #667eea; }
+        .menu-item span { font-size: 0.8em; display: block; margin-top: 5px; }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 15px;
+            color: #fff;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .help-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.9);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
+        .toast.show { display: block; animation: slideUp 0.3s; }
+        .toast.success { border-right: 4px solid #2ed573; }
+        .toast.error { border-right: 4px solid #ff4757; }
+        .panel { display: none; }
+        .panel.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(100px); } to { transform: translateY(0); } }
+        .loading { text-align: center; padding: 20px; }
+        .loading-spinner { width: 30px; height: 30px; border: 3px solid rgba(102,126,234,0.3); border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        code { background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 10px; display: inline-block; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1><i class="fas fa-crown"></i> بِت رِد | BetRed</h1>
+    <p>گردونه شانس روزانه</p>
+</div>
+
+<div class="score-card" onclick="requestBalance()">
+    <div class="score-label"><i class="fas fa-gem"></i> الماس شما (برای مشاهده کلیک کن)</div>
+    <div class="score-value" id="diamondScore">---</div>
+</div>
+
+<div class="wheel-container">
+    <canvas id="wheelCanvas" width="300" height="300"></canvas>
+    <button class="btn spin-btn" id="spinBtn" onclick="spinWheel()">
+        <i class="fas fa-play"></i> چرخوندن گردونه
+    </button>
+    <div class="result-box" id="resultBox">⏳ برای چرخوندن دکمه رو بزن</div>
+</div>
+
+<div class="menu-grid">
+    <div class="menu-item" onclick="showPanel('transferPanel')">
+        <i class="fas fa-exchange-alt"></i><span>انتقال الماس</span>
+    </div>
+    <div class="menu-item" onclick="showPanel('referralPanel')">
+        <i class="fas fa-users"></i><span>دعوت دوستان</span>
+    </div>
+    <div class="menu-item" onclick="showPanel('chargePanel')">
+        <i class="fas fa-shopping-cart"></i><span>شارژ موجودی</span>
+    </div>
+    <div class="menu-item" onclick="openBot()">
+        <i class="fab fa-telegram"></i><span>باز کردن ربات</span>
+    </div>
+</div>
+
+<div class="panel" id="transferPanel">
+    <div class="help-card">
+        <h4>💎 نحوه انتقال الماس</h4>
+        <p>۱. ربات رو باز کن</p>
+        <p>۲. در گروه یا پیوی دستور زیر رو بفرست:</p>
+        <code>انتقال 20 @username</code>
+        <button class="btn" onclick="openBot()" style="margin-top:15px;">📲 باز کردن ربات</button>
+    </div>
+</div>
+
+<div class="panel" id="referralPanel">
+    <div class="help-card">
+        <h4>🎁 پاداش دعوت</h4>
+        <p>به ازای هر دوست که دعوت کنی <strong>40 الماس</strong> هدیه میگیری!</p>
+        <p style="margin-top:10px;">🔗 لینک دعوت تو:</p>
+        <code id="referralLink" style="word-break:break-all;">در حال دریافت...</code>
+        <button class="btn" onclick="copyReferralLink()">📋 کپی لینک</button>
+        <button class="btn" onclick="shareBot()">📤 اشتراک گذاری</button>
+    </div>
+</div>
+
+<div class="panel" id="chargePanel">
+    <div class="help-card">
+        <h4>💳 اطلاعات پرداخت</h4>
+        <p>💳 کارت: <code>6219861958919879</code><br>👤 به نام: یوسف فر<br>💎 هر الماس: ۱۵ تومان</p>
+        <p style="margin-top:10px;">📸 بعد از پرداخت، رسید رو توی ربات بفرست</p>
+        <button class="btn" onclick="openBot()">📲 باز کردن ربات</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastMessage"></span></div>
+
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    
+    let userId = tg.initDataUnsafe.user?.id;
+    let userFirstName = tg.initDataUnsafe.user?.first_name || "کاربر";
+    let botUsername = "SelfsazRedBot";
+    
+    let lastSpinDate = localStorage.getItem(`lastSpin_${userId}`);
+    let canSpin = true;
+    
+    // بخش‌های گردونه
+    const segments = [
+        { label: "10", value: 10, color: "#ff4757" },
+        { label: "20", value: 20, color: "#2ed573" },
+        { label: "30", value: 30, color: "#1e90ff" },
+        { label: "50", value: 50, color: "#ffa502" },
+        { label: "100", value: 100, color: "#ff6b81" },
+        { label: "0", value: 0, color: "#a4b0be" },
+        { label: "5", value: 5, color: "#70a1ff" },
+        { label: "15", value: 15, color: "#7bed9f" }
+    ];
+    
+    let currentAngle = 0;
+    let spinning = false;
+    
+    function drawWheel() {
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const size = canvas.width;
+        const center = size / 2;
+        const radius = size / 2 - 5;
+        const angleStep = (Math.PI * 2) / segments.length;
+        
+        ctx.clearRect(0, 0, size, size);
+        
+        for (let i = 0; i < segments.length; i++) {
+            const start = currentAngle + i * angleStep;
+            const end = start + angleStep;
+            ctx.beginPath();
+            ctx.moveTo(center, center);
+            ctx.arc(center, center, radius, start, end);
+            ctx.fillStyle = segments[i].color;
+            ctx.fill();
+            ctx.save();
+            ctx.translate(center, center);
+            ctx.rotate(start + angleStep / 2);
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 16px Vazirmatn";
+            ctx.shadowBlur = 0;
+            ctx.fillText(segments[i].label, radius - 25, 8);
+            ctx.restore();
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(center - 10, 10);
+        ctx.lineTo(center + 10, 10);
+        ctx.lineTo(center, 25);
+        ctx.fillStyle = "#ff4757";
+        ctx.fill();
+    }
+    
+    function showToast(message, isError = false) {
+        let toast = document.getElementById('toast');
+        let toastMsg = document.getElementById('toastMessage');
+        toastMsg.innerHTML = message;
+        toast.className = isError ? 'toast show error' : 'toast show success';
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    function showPanel(panelId) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(panelId).classList.add('active');
+        if (panelId === 'referralPanel') {
+            document.getElementById('referralLink').innerHTML = `https://t.me/${botUsername}?start=${userId}`;
+        }
+    }
+    
+    function openBot() {
+        tg.openTelegramLink(`https://t.me/${botUsername}`);
+        tg.close();
+    }
+    
+    function requestBalance() {
+        tg.sendData(JSON.stringify({ action: "balance" }));
+        tg.close();
+        showToast("📨 درخواست موجودی فرستاده شد! ربات رو چک کن.");
+    }
+    
+    function sendPrizeToBot(amount) {
+        const resultBox = document.getElementById('resultBox');
+        resultBox.innerHTML = `🎉 تبریک! ${amount} الماس برنده شدی! 🎉`;
+        
+        tg.sendData(JSON.stringify({
+            action: "add_balance",
+            amount: amount
+        }));
+        
+        showToast(`✅ ${amount} الماس برنده شدی! ربات رو چک کن.`);
+        
+        localStorage.setItem(`lastSpin_${userId}`, new Date().toISOString());
+        canSpin = false;
+        
+        let remaining = 24;
+        document.getElementById('resultBox').innerHTML = `⏳ چرخش بعدی: ${remaining} ساعت دیگه`;
+    }
+    
+    function spinWheel() {
+        if (spinning) {
+            showToast("⏳ در حال چرخیدن...", true);
+            return;
+        }
+        
+        if (!canSpin) {
+            showToast("❌ هر 24 ساعت فقط یک بار می‌تونی بچرخی!", true);
+            return;
+        }
+        
+        spinning = true;
+        const spinBtn = document.getElementById('spinBtn');
+        spinBtn.disabled = true;
+        
+        const spinAngle = 360 * 8 + Math.random() * 360;
+        const targetSegment = Math.floor(Math.random() * segments.length);
+        const targetValue = segments[targetSegment].value;
+        
+        const startAngle = currentAngle;
+        const endAngle = startAngle + (spinAngle * Math.PI / 180);
+        const duration = 3000;
+        const startTime = performance.now();
+        
+        function animate(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            currentAngle = startAngle + (endAngle - startAngle) * easeOut;
+            drawWheel();
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                currentAngle = endAngle % (Math.PI * 2);
+                drawWheel();
+                sendPrizeToBot(targetValue);
+                spinning = false;
+                spinBtn.disabled = false;
+            }
+        }
+        
+        requestAnimationFrame(animate);
+    }
+    
+    function copyReferralLink() {
+        let link = `https://t.me/${botUsername}?start=${userId}`;
+        navigator.clipboard.writeText(link);
+        showToast("✅ لینک دعوت کپی شد!");
+    }
+    
+    function shareBot() {
+        tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/${botUsername}?start=${userId}&text=🎁 به ربات BetRed بپیوند!`);
+    }
+    
+    // بررسی آخرین چرخش
+    if (lastSpinDate) {
+        let last = new Date(lastSpinDate);
+        let now = new Date();
+        let diffHours = (now - last) / (1000 * 60 * 60);
+        if (diffHours < 24) {
+            canSpin = false;
+            let remaining = Math.ceil(24 - diffHours);
+            document.getElementById('resultBox').innerHTML = `⏳ چرخش بعدی: ${remaining} ساعت دیگه`;
+        }
+    }
+    
+    if (userId) {
+        document.getElementById('diamondScore').innerHTML = '👆 کلیک کن';
+        drawWheel();
+    } else {
+        document.getElementById('diamondScore').innerHTML = 'ورود ناموفق';
+    }
+</script>
+</body>
+</html>
