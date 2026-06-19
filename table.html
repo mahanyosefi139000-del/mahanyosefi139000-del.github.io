@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اینستاگرام دانلودر | GrimZone</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.0.3/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #0b0d17 0%, #1a1d35 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: rgba(19, 22, 38, 0.75);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 35px 30px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo i {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #b388ff, #00e5ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-top: 8px;
+            background: linear-gradient(135deg, #b388ff, #00e5ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo p {
+            color: #a0a6c0;
+            font-size: 0.9rem;
+        }
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .input-group input {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+        .input-group input::placeholder {
+            color: #6a6f8a;
+        }
+        .input-group input:focus {
+            border-color: #b388ff;
+            box-shadow: 0 0 20px rgba(179,136,255,0.2);
+        }
+        .input-group button {
+            padding: 14px 28px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(135deg, #b388ff, #00e5ff);
+            color: #0b0d17;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+        .input-group button:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 30px rgba(179,136,255,0.4);
+        }
+        .input-group button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #a0a6c0;
+        }
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+            color: #b388ff;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .result {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .result img, .result video {
+            width: 100%;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            max-height: 500px;
+            object-fit: cover;
+        }
+        .result .info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .result .info .type-badge {
+            background: rgba(179,136,255,0.2);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(179,136,255,0.2);
+        }
+        .result .info .download-btn {
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(135deg, #00e5ff, #b388ff);
+            color: #0b0d17;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+        .result .info .download-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 30px rgba(0,229,255,0.3);
+        }
+        .error {
+            display: none;
+            background: rgba(255,64,129,0.15);
+            border: 1px solid #ff4081;
+            padding: 14px 20px;
+            border-radius: 20px;
+            margin-top: 16px;
+            color: #ff4081;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #5a5f7a;
+            font-size: 0.75rem;
+        }
+        .footer a {
+            color: #b388ff;
+            text-decoration: none;
+        }
+        @media (max-width: 550px) {
+            .container { padding: 25px 18px; }
+            .input-group { flex-direction: column; }
+            .input-group button { width: 100%; }
+            .result .info { flex-direction: column; align-items: stretch; }
+            .result .info .download-btn { justify-content: center; }
+        }
+        .type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .type-selector button {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: #a0a6c0;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .type-selector button.active {
+            background: linear-gradient(135deg, #b388ff, #00e5ff);
+            color: #0b0d17;
+            border-color: transparent;
+            font-weight: 600;
+        }
+        .type-selector button:hover:not(.active) {
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo">
+        <i class="fab fa-instagram"></i>
+        <h1>اینستاگرام دانلودر</h1>
+        <p>لینک پست، ریلز یا استوری را وارد کن</p>
+    </div>
+
+    <!-- انتخاب نوع محتوا -->
+    <div class="type-selector">
+        <button class="active" data-type="post2">پست / ریلز</button>
+        <button data-type="story">استوری</button>
+        <button data-type="highlight">هایلایت</button>
+        <button data-type="info">اطلاعات پیج</button>
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="urlInput" placeholder="https://www.instagram.com/p/...">
+        <button id="downloadBtn"><i class="fas fa-download"></i> دریافت</button>
+    </div>
+
+    <div class="loading" id="loading">
+        <i class="fas fa-spinner"></i>
+        <p style="margin-top: 10px;">در حال دریافت اطلاعات...</p>
+    </div>
+
+    <div class="error" id="error"></div>
+
+    <div class="result" id="result">
+        <div id="mediaContainer"></div>
+        <div class="info">
+            <span class="type-badge" id="typeBadge">ویدیو</span>
+            <a href="#" id="downloadLink" class="download-btn" target="_blank">
+                <i class="fas fa-arrow-down"></i> دانلود
+            </a>
+        </div>
+    </div>
+
+    <div class="footer">
+        توسعه‌دهنده: <a href="https://t.me/Broken4Her" target="_blank">MAHAN</a>
+    </div>
+</div>
+
+<script>
+    // ========== تنظیمات ==========
+    const API_BASE = 'https://api.fast-creat.ir/instagram';
+    const API_KEY = '8492696944:zlMChRI2gHn8ALX@Api_ManagerRoBot';
+
+    // ========== DOM ==========
+    const urlInput = document.getElementById('urlInput');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const result = document.getElementById('result');
+    const mediaContainer = document.getElementById('mediaContainer');
+    const typeBadge = document.getElementById('typeBadge');
+    const downloadLink = document.getElementById('downloadLink');
+    const typeButtons = document.querySelectorAll('.type-selector button');
+
+    let currentType = 'post2';
+
+    // ========== انتخاب نوع ==========
+    typeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            typeButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentType = this.dataset.type;
+            // تغییر placeholder بر اساس نوع
+            if (currentType === 'info') {
+                urlInput.placeholder = 'نام کاربری پیج (مثلاً: grimzone)';
+            } else {
+                urlInput.placeholder = 'https://www.instagram.com/p/...';
+            }
+            // پاک کردن نتایج قبلی
+            result.style.display = 'none';
+            error.style.display = 'none';
+        });
+    });
+
+    // ========== تابع اصلی ==========
+    downloadBtn.addEventListener('click', async () => {
+        const input = urlInput.value.trim();
+        if (!input) {
+            showError('لطفاً لینک یا نام کاربری را وارد کنید.');
+            return;
+        }
+
+        downloadBtn.disabled = true;
+        loading.style.display = 'block';
+        result.style.display = 'none';
+        error.style.display = 'none';
+
+        try {
+            let apiUrl = `${API_BASE}?apikey=${API_KEY}&type=${currentType}`;
+
+            // اضافه کردن پارامتر بر اساس نوع
+            if (currentType === 'info') {
+                apiUrl += `&username=${encodeURIComponent(input)}`;
+            } else {
+                apiUrl += `&url=${encodeURIComponent(input)}`;
+            }
+
+            console.log('درخواست به:', apiUrl);
+
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+
+            console.log('پاسخ:', data);
+
+            if (!response.ok) {
+                throw new Error(data.message || `خطای HTTP ${response.status}`);
+            }
+
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'درخواست ناموفق بود');
+            }
+
+            // نمایش نتیجه بر اساس نوع
+            if (currentType === 'info') {
+                displayProfileInfo(data.data);
+            } else {
+                displayMedia(data.data);
+            }
+
+        } catch (err) {
+            console.error('خطا:', err);
+            showError(err.message || 'خطا در ارتباط با سرور');
+        } finally {
+            downloadBtn.disabled = false;
+            loading.style.display = 'none';
+        }
+    });
+
+    // ========== نمایش مدیا ==========
+    function displayMedia(data) {
+        // تشخیص نوع محتوا
+        const items = data.items || data;
+        const firstItem = Array.isArray(items) ? items[0] : items;
+
+        if (!firstItem) {
+            showError('محتوا یافت نشد.');
+            return;
+        }
+
+        const isVideo = firstItem.type === 'video' || firstItem.is_video;
+        const mediaUrl = isVideo ? (firstItem.video_url || firstItem.url) : (firstItem.image_url || firstItem.url);
+
+        if (!mediaUrl) {
+            showError('لینک دانلود یافت نشد.');
+            return;
+        }
+
+        // نمایش مدیا
+        mediaContainer.innerHTML = isVideo
+            ? `<video controls src="${mediaUrl}" playsinline></video>`
+            : `<img src="${mediaUrl}" alt="پست اینستاگرام">`;
+
+        typeBadge.textContent = isVideo ? '🎬 ویدیو / ریلز' : '🖼️ تصویر';
+        downloadLink.href = mediaUrl;
+        downloadLink.download = `instagram_${Date.now()}.${isVideo ? 'mp4' : 'jpg'}`;
+
+        result.style.display = 'block';
+        result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // ========== نمایش اطلاعات پیج ==========
+    function displayProfileInfo(data) {
+        const user = data.user || data;
+        mediaContainer.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 20px; padding: 10px 0; flex-wrap: wrap;">
+                <img src="${user.profile_pic_url}" alt="پروفایل" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #b388ff;">
+                <div>
+                    <h3 style="font-size: 1.3rem;">${user.full_name || user.username}</h3>
+                    <p style="color: #a0a6c0;">@${user.username}</p>
+                    <p style="color: #a0a6c0; font-size: 0.9rem;">${user.bio || ''}</p>
+                    <div style="display: flex; gap: 20px; margin-top: 8px;">
+                        <span>📌 ${user.posts || 0}</span>
+                        <span>👥 ${user.followers || 0}</span>
+                        <span>📢 ${user.following || 0}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        typeBadge.textContent = '👤 اطلاعات پیج';
+        downloadLink.href = user.profile_pic_url || '#';
+        downloadLink.download = `profile_${user.username}.jpg`;
+        downloadLink.textContent = 'دانلود عکس پروفایل';
+
+        result.style.display = 'block';
+        result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // ========== نمایش خطا ==========
+    function showError(msg) {
+        error.textContent = msg;
+        error.style.display = 'block';
+        result.style.display = 'none';
+    }
+
+    // ========== اجرا با Enter ==========
+    urlInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') downloadBtn.click();
+    });
+</script>
+</body>
+</html>
